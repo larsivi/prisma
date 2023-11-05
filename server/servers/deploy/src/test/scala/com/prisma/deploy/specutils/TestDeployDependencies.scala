@@ -54,7 +54,6 @@ case class TestDeployDependencies()(implicit val system: ActorSystem, val materi
     }
   }
 
-  lazy val telemetryActor                            = TestProbe().ref
   override val managementSecret: String              = ""
   override val cacheFactory: CacheFactory            = new CaffeineCacheFactory()
   override lazy val metricsRegistry: MetricsRegistry = ???

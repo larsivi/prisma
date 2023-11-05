@@ -29,7 +29,7 @@ object GCBisonTransformer {
       case UuidGCValue(v)     => BsonString(v.toString)
       case DateTimeGCValue(v) => BsonDateTime(v.getMillis)
       case BooleanGCValue(v)  => BsonBoolean(v)
-      case ListGCValue(list)  => BsonArray(list.map(x => GCToBson(x)))
+      case ListGCValue(list)  => BsonArray.fromIterable(list.map(x => GCToBson(x)))
       case NullGCValue        => null
       case StringIdGCValue(v) =>
         try {

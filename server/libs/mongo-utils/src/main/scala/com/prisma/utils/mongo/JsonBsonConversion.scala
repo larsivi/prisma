@@ -41,7 +41,7 @@ trait JsonBsonConversion extends JsonUtils {
     case JsBoolean(v) => BsonBoolean(v)
     case JsNumber(v)  => BsonNumber(v.toDouble)
     case JsNull       => BsonNull()
-    case JsArray(v)   => BsonArray(v.map(x => jsonToBson(x)))
+    case JsArray(v)   => BsonArray.fromIterable(v.map(x => jsonToBson(x)))
     case v: JsObject  => jsObjectToBson(v)
     case x            => sys.error(s"$x not supported here")
   }

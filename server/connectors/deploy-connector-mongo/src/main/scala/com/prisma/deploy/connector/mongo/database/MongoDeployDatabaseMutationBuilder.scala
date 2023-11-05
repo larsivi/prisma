@@ -28,12 +28,12 @@ object MongoDeployDatabaseMutationBuilder {
   def truncateProjectTables(project: Project) = DeployMongoAction { database =>
     val nonEmbeddedModels = project.models.filter(!_.isEmbedded)
 
-    def dropTables: Future[List[Completed]] = Future.sequence(nonEmbeddedModels.map(model => database.getCollection(model.dbName).drop().toFuture()))
+    def dropTables: Future[List[Void]] = Future.sequence(nonEmbeddedModels.map(model => database.getCollection(model.dbName).drop().toFuture()))
 
-    def createTables(drops: List[Completed]): Future[List[Completed]] =
+    def createTables(drops: List[Void]): Future[List[Void]] =
       Future.sequence(nonEmbeddedModels.map(model => database.createCollection(model.dbName).toFuture()))
 
-    def createUniques(creates: List[Completed]): Future[List[List[Any]]] =
+    def createUniques(creates: List[Void]): Future[List[List[Any]]] =
       Future.sequence(nonEmbeddedModels.map { model =>
         Future.sequence(model.scalarNonListFields.filter(_.isUnique).map(field => addUniqueConstraint(database, model.dbName, field.name)))
       })
@@ -48,8 +48,8 @@ object MongoDeployDatabaseMutationBuilder {
       })
 
     for {
-      drops: List[Completed]   <- dropTables
-      creates: List[Completed] <- createTables(drops)
+      drops: List[Void]        <- dropTables
+      creates: List[Void]      <- createTables(drops)
       uniques                  <- createUniques(creates)
       relations                <- createRelationIndexes(uniques)
     } yield ()

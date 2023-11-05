@@ -14,7 +14,6 @@ import com.prisma.config.{ConfigLoader, PrismaConfig}
 import com.prisma.connectors.utils.{ConnectorLoader, SupportedDrivers}
 import com.prisma.deploy.DeployDependencies
 import com.prisma.deploy.migration.migrator.{AsyncMigrator, Migrator}
-import com.prisma.deploy.server.TelemetryActor
 import com.prisma.deploy.server.auth.{AsymmetricManagementAuth, DummyManagementAuth, SymmetricManagementAuth}
 import com.prisma.image.{Converters, FunctionValidatorImpl, SingleServerProjectFetcher}
 import com.prisma.messagebus.PubSubSubscriber
@@ -93,13 +92,10 @@ case class PrismaLocalDependencies()(implicit val system: ActorSystem, val mater
   override lazy val mutactionVerifier             = DatabaseMutactionVerifierImpl
   override val metricsRegistry: MetricsRegistry   = MicrometerMetricsRegistry.initialize(deployConnector.cloudSecretPersistence)
 
-  lazy val telemetryActor = system.actorOf(Props(TelemetryActor(deployConnector)))
-
   def initialize()(implicit system: ActorSystem): Unit = {
     JdbcApiMetrics.init(metricsRegistry) // Todo lacking a better init structure for now
     initializeDeployDependencies()
     initializeApiDependencies()
     initializeSubscriptionDependencies()
-    telemetryActor
   }
 }

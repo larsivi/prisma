@@ -138,7 +138,7 @@ trait NodeActions extends NodeSingleQueries {
       val rf: RelationField = t._1
       val documents         = t._2.map(_.toBsonDocument)
 
-      if (rf.isList) map + (rf.dbName -> BsonArray(documents)) else map + (rf.dbName -> documents.head)
+      if (rf.isList) map + (rf.dbName -> BsonArray.fromIterable(documents)) else map + (rf.dbName -> documents.head)
     }
 
     (nestedCreateFields, childResults)

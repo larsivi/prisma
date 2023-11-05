@@ -33,7 +33,6 @@ trait DeployDependencies extends AwaitUtils {
   def deployConnector: DeployConnector
   def functionValidator: FunctionValidator
   def projectIdEncoder: ProjectIdEncoder
-  def telemetryActor: ActorRef
 
   lazy val projectPersistence      = deployConnector.projectPersistence
   lazy val migrationPersistence    = deployConnector.migrationPersistence

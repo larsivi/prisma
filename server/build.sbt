@@ -41,7 +41,7 @@ def commonDockerImageSettings(imageName: String, baseImage: String, tag: String)
     val targetDir = "/app"
 
     new Dockerfile {
-      from(s"$baseImage:$tag")
+      from(s"$baseImage")
       copy(appDir, targetDir)
       copy(prerunHookFile , s"$targetDir/prerun_hook.sh")
       runShell(s"touch", s"$targetDir/start.sh")
@@ -53,6 +53,7 @@ def commonDockerImageSettings(imageName: String, baseImage: String, tag: String)
       runShell(s"chmod", "+x", s"$targetDir/bin/${executableScriptName.value}")
       env("COMMIT_SHA", sys.env.getOrElse("COMMIT_SHA", sys.error("Env var COMMIT_SHA required but not found.")))
       env("CLUSTER_VERSION", sys.env.getOrElse("CLUSTER_VERSION", sys.error("Env var CLUSTER_VERSION required but not found.")))
+      env("LOG_LEVEL", sys.env.getOrElse("LOG_LEVEL", "INFO"))
       entryPointShell(s"$targetDir/start.sh")
     }
   }
@@ -60,7 +61,7 @@ def commonDockerImageSettings(imageName: String, baseImage: String, tag: String)
 
 javaOptions in Universal ++= Seq("-Dorg.jooq.no-logo=true")
 
-def imageProject(name: String, imageName: String, baseImage: String = "anapsix/alpine-java", tag: String = "latest"): Project = imageProject(name).enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging).settings(commonDockerImageSettings(imageName, baseImage, tag): _*).dependsOn(prismaImageShared)
+def imageProject(name: String, imageName: String, baseImage: String = "openjdk:11-slim", tag: String = "latest"): Project = imageProject(name).enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging).settings(commonDockerImageSettings(imageName, baseImage, tag): _*).dependsOn(prismaImageShared)
 def imageProject(name: String): Project = Project(id = name, base = file(s"./images/$name"))
 def serverProject(name: String): Project = Project(id = name, base = file(s"./servers/$name")).settings(commonServerSettings: _*).dependsOn(scalaUtils).dependsOn(tracing).dependsOn(logging)
 def connectorProject(name: String): Project =  Project(id = name, base = file(s"./connectors/$name")).settings(commonSettings: _*).dependsOn(scalaUtils).dependsOn(prismaConfig).dependsOn(tracing)

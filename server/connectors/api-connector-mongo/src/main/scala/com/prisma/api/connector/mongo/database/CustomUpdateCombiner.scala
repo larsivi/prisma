@@ -24,7 +24,7 @@ object CustomUpdateCombiner {
       val groupedPulls: Map[Vector[String], Vector[CombinedPullDefinition]] = convertedPulls.groupBy(_.keys)
 
       val changedPulls = groupedPulls.map { group =>
-        bsonDocumentFilter(group._1.toList, BsonArray(group._2.map(_.value)))
+        bsonDocumentFilter(group._1.toList, BsonArray.fromIterable(group._2.map(_.value)))
       }
 
       combine(others.map(_._2) ++ changedPulls: _*)

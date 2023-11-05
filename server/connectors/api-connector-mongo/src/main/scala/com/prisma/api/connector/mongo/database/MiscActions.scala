@@ -1,7 +1,7 @@
 package com.prisma.api.connector.mongo.database
 
 import com.prisma.api.connector.{MutactionResults, ResetData, UnitDatabaseMutactionResult}
-import org.mongodb.scala.{Completed, MongoDatabase}
+import org.mongodb.scala.MongoDatabase
 import org.mongodb.scala.model.IndexOptions
 import org.mongodb.scala.model.Sorts.ascending
 
@@ -13,12 +13,12 @@ trait MiscActions {
     val project           = mutaction.project
     val nonEmbeddedModels = project.models.filter(!_.isEmbedded)
 
-    def dropTables: Future[List[Completed]] = Future.sequence(nonEmbeddedModels.map(model => database.getCollection(model.dbName).drop().toFuture()))
+    def dropTables: Future[List[Void]] = Future.sequence(nonEmbeddedModels.map(model => database.getCollection(model.dbName).drop().toFuture()))
 
-    def createTables(drops: List[Completed]): Future[List[Completed]] =
+    def createTables(drops: List[Void]): Future[List[Void]] =
       Future.sequence(nonEmbeddedModels.map(model => database.createCollection(model.dbName).toFuture()))
 
-    def createUniques(creates: List[Completed]): Future[List[List[Any]]] =
+    def createUniques(creates: List[Void]): Future[List[List[Any]]] =
       Future.sequence(nonEmbeddedModels.map { model =>
         Future.sequence(model.scalarNonListFields.filter(_.isUnique).map(field => addUniqueConstraint(database, model.dbName, field.name)))
       })
@@ -33,8 +33,8 @@ trait MiscActions {
       })
 
     for {
-      drops: List[Completed]   <- dropTables
-      creates: List[Completed] <- createTables(drops)
+      drops: List[Void]        <- dropTables
+      creates: List[Void]      <- createTables(drops)
       uniques                  <- createUniques(creates)
       relations                <- createRelationIndexes(uniques)
     } yield MutactionResults(Vector(UnitDatabaseMutactionResult))

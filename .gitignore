@@ -38,3 +38,6 @@ buildkite-script-*
 
 # VSCode specific
 .vscode/
+
+# Vim specific
+*.un~
