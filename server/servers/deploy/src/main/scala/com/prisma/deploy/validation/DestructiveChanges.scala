@@ -197,7 +197,8 @@ case class DestructiveChanges(clientDbQueries: ClientDbQueries,
     val oldField                 = model.getFieldByName_!(x.name)
     val newField                 = nextSchema.getModelByName_!(x.newModel).getFieldByName_!(x.finalName)
     val cardinalityChanges       = oldField.isList != newField.isList
-    val typeChanges              = oldField.typeIdentifier != newField.typeIdentifier
+    val enumToStringConversion   = oldField.typeIdentifier.code.equals("Enum") && newField.typeIdentifier.code.equals("String")
+    val typeChanges              = oldField.typeIdentifier != newField.typeIdentifier && !enumToStringConversion
     val goesFromScalarToRelation = oldField.isScalar && newField.isRelation
     val goesFromRelationToScalar = oldField.isRelation && newField.isScalar
     val becomesRequired          = !oldField.isRequired && newField.isRequired
@@ -216,7 +217,7 @@ case class DestructiveChanges(clientDbQueries: ClientDbQueries,
           case true if newField.isRequired && newField.isScalar && isMongo =>
             Vector(DeployErrors.makingFieldRequiredMongo(model.name, oldField.name))
 
-          case true =>
+          case true if !enumToStringConversion =>
             Vector(DeployWarnings.dataLossField(model.name, oldField.name))
 
           case false =>
